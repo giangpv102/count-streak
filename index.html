@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7cf">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Streak Clicker</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #12182b;
+      --muted: #8a94a7;
+      --text: #e9eef5;
+      --accent: #7cf;
+      --accent-2: #9f7cff;
+      --danger: #ff6b6b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1000px 600px at 20% -10%, #16213a, var(--bg));
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #141b33, var(--card));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .streak {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 12px;
+      align-items: end;
+      margin: 12px 0 8px;
+    }
+
+    .streak .label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .streak .value {
+      font-size: clamp(44px, 9vw, 72px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(180deg, #1a2544, #0f1833);
+      color: white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      transition: transform .06s ease, filter .2s ease, box-shadow .2s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button[disabled] {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .btn-accent {
+      background-image: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b0f1d;
+    }
+
+    .btn-subtle {
+      background-image: linear-gradient(180deg, #1a223a, #0f1730);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .btn-danger {
+      background-image: linear-gradient(180deg, #3b1620, #2a0d14);
+      color: #ffdede;
+    }
+
+    .tips {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .grid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      align-items: center;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      background: #1a2139;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .cell.on {
+      background: linear-gradient(180deg, #1e305f, #0f1c3e);
+      box-shadow: inset 0 0 0 1px rgba(124, 255, 255, 0.35);
+    }
+
+    .cell.today {
+      outline: 2px dashed rgba(124, 255, 255, 0.7);
+      outline-offset: 2px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      background: #1a2139;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .legend .dot.on {
+      background: linear-gradient(180deg, #1e305f, #0f1c3e);
+      box-shadow: inset 0 0 0 1px rgba(124, 255, 255, 0.35);
+    }
+
+    footer {
+      margin-top: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="title">🧊 Daily Streak</div>
+          <div class="muted">Nhấn nút mỗi ngày để duy trì streak của bạn.</div>
+        </div>
+        <div class="pill" id="tz-pill">Timezone: ...</div>
+      </div>
+
+      <section class="streak">
+        <div class="label">Streak hiện tại</div>
+        <div class="value" id="streak">0</div>
+
+        <div class="label">Kỷ lục</div>
+        <div class="value" id="best">0</div>
+      </section>
+
+      <div class="row" style="margin: 8px 0 4px">
+        <div class="muted" id="status">—</div>
+        <div class="muted" id="last">Lần check-in gần nhất: —</div>
+      </div>
+
+      <div class="actions">
+        <button id="checkin" class="btn-accent">✅ Check-in hôm nay</button>
+        <button id="skip" class="btn-subtle">📅 Tôi đã quên hôm qua (ghi chú)</button>
+        <button id="reset" class="btn-danger">♻️ Đặt lại dữ liệu</button>
+      </div>
+
+      <div class="tips">Mẹo: Thêm trang này vào màn hình chính (PWA nhẹ) hoặc đánh dấu trang để check-in nhanh mỗi ngày.
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <div class="muted">7 ngày gần đây</div>
+        <div class="legend">
+          <span>Off</span><span class="dot"></span>
+          <span>On</span><span class="dot on"></span>
+        </div>
+      </div>
+      <div class="grid" id="mini-grid" aria-hidden="true"></div>
+
+    </div>
+
+    <footer>
+      Made for you · Lưu cục bộ bằng <code>localStorage</code> – không cần đăng nhập.
+    </footer>
+  </main>
+
+  <script>
+    const TIMEZONE = 'Asia/Bangkok';
+    const F = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
+    const fmt = (d) => F.format(d); // YYYY-MM-DD
+
+    const el = (id) => document.getElementById(id);
+
+    const store = {
+      read() {
+        const raw = JSON.parse(localStorage.getItem('streak-data') || '{}');
+        return {
+          count: raw.count ?? 0,
+          best: raw.best ?? 0,
+          lastDate: raw.lastDate ?? null,
+          notes: raw.notes ?? [],
+          tz: raw.tz || TIMEZONE,
+        };
+      },
+      write(data) {
+        localStorage.setItem('streak-data', JSON.stringify(data));
+      }
+    };
+
+    function getToday() {
+      return fmt(new Date());
+    }
+    function getYesterdayStr() {
+      const now = new Date();
+      // Convert to target tz by using parts from formatter
+      const parts = F.formatToParts(now).reduce((a, p) => (a[p.type] = p.value, a), {});
+      const tzDate = new Date(`${parts.year}-${parts.month}-${parts.day}T00:00:00`);
+      tzDate.setDate(tzDate.getDate() - 1);
+      return fmt(tzDate);
+    }
+
+    function daysBetweenYYYYMMDD(a, b) {
+      // a,b are 'YYYY-MM-DD' in the same timezone; compare as UTC-midnight
+      const A = new Date(a + 'T00:00:00Z');
+      const B = new Date(b + 'T00:00:00Z');
+      return Math.round((B - A) / 86400000);
+    }
+
+    function renderMiniGrid(data) {
+      const grid = document.getElementById('mini-grid');
+      grid.innerHTML = '';
+      const today = getToday();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today + 'T00:00:00');
+        d.setDate(d.getDate() - i);
+        const s = fmt(d);
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (data.lastDate && (s === data.lastDate || (data.count > 0 && daysBetweenYYYYMMDD(s, data.lastDate) >= 0 && daysBetweenYYYYMMDD(data.lastDate, s) < data.count))) {
+          // This heuristic paints a rough recent streak window
+          if (daysBetweenYYYYMMDD(s, data.lastDate) < data.count) cell.classList.add('on');
+        }
+        if (s === today) cell.classList.add('today');
+        grid.appendChild(cell);
+      }
+    }
+
+    function updateUI() {
+      const data = store.read();
+      el('streak').textContent = data.count;
+      el('best').textContent = data.best;
+      el('tz-pill').textContent = 'Timezone: ' + data.tz;
+
+      const today = getToday();
+      const y = getYesterdayStr();
+
+      let status = '';
+      let canCheck = true;
+
+      if (data.lastDate === today) {
+        status = '✅ Đã check-in hôm nay (' + today + ').';
+        canCheck = false;
+      } else if (data.lastDate === y) {
+        status = '🟦 Tiếp tục streak – hôm qua bạn đã check-in.';
+      } else if (data.lastDate == null) {
+        status = '✨ Hãy bắt đầu streak đầu tiên hôm nay!';
+      } else {
+        status = '⚠️ Bị gián đoạn từ ' + data.lastDate + '. Nhấn để bắt đầu lại.';
+      }
+
+      el('status').textContent = status;
+      el('last').textContent = 'Lần check-in gần nhất: ' + (data.lastDate ?? '—');
+
+      const btn = el('checkin');
+      btn.disabled = !canCheck;
+      btn.textContent = (canCheck ? '✅ Check-in hôm nay' : 'Đã check-in hôm nay');
+
+      renderMiniGrid(data);
+    }
+
+    function checkIn() {
+      const data = store.read();
+      const today = getToday();
+      const y = getYesterdayStr();
+
+      if (data.lastDate === today) return; // already
+
+      if (data.lastDate === y) {
+        data.count = (data.count || 0) + 1;
+      } else {
+        data.count = 1; // start over or first time
+      }
+
+      if (data.count > (data.best || 0)) data.best = data.count;
+      data.lastDate = today;
+      data.tz = TIMEZONE;
+      store.write(data);
+      updateUI();
+    }
+
+    function resetAll() {
+      if (!confirm('Đặt lại toàn bộ dữ liệu streak trên trình duyệt này?')) return;
+      store.write({ count: 0, best: 0, lastDate: null, notes: [], tz: TIMEZONE });
+      updateUI();
+    }
+
+    function addNoteMissed() {
+      const d = prompt('Mô tả ngắn lý do bạn bỏ lỡ (tuỳ chọn):');
+      const data = store.read();
+      const today = getToday();
+      data.notes = data.notes || [];
+      data.notes.push({ when: today, text: d || '—' });
+      store.write(data);
+      alert('Đã ghi chú. Cố gắng check-in đều nhé!');
+    }
+
+    // Bind UI
+    document.getElementById('checkin').addEventListener('click', checkIn);
+    document.getElementById('reset').addEventListener('click', resetAll);
+    document.getElementById('skip').addEventListener('click', addNoteMissed);
+    if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js")
+      .then(() => console.log("Service Worker registered"))
+      .catch((err) => console.log("SW registration failed:", err));
+  }
+    // First paint
+    updateUI();
+     
+  </script>
+</body>
+
+</html>
